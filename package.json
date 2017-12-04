@@ -1,0 +1,27 @@
+{
+  "name": "spa-individual-projectapi",
+  "version": "1.0.0",
+  "description": "Express API for communication with Neo4J and MongoDB Databases",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mamjong/SPA-Individual-ProjectAPI.git"
+  },
+  "author": "Mark de Jong (mamjong)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mamjong/SPA-Individual-ProjectAPI/issues"
+  },
+  "homepage": "https://github.com/mamjong/SPA-Individual-ProjectAPI#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "mongoose": "^4.13.6",
+    "body-parser": "^1.18.2"
+  },
+  "devDependencies": {
+    "mocha": "^4.0.1"
+  }
+}
