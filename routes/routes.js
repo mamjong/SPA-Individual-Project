@@ -1,6 +1,6 @@
-const GamesController = require('../controllers/games_controller');
+const ConceptsController = require('../controllers/concepts_controller');
 
 module.exports = (app) => {
 
-	app.get('/api')
+	app.get('/api/concepts', ConceptsController.get)
 };
