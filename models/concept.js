@@ -25,8 +25,8 @@ const ConceptSchema = new Schema({
 		}
 	}],
 	user: {
-		type: String,
-		ref: 'user.username'
+		type: Schema.Types.ObjectId,
+		ref: 'user'
 	}
 });
 

@@ -18,7 +18,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 app.use(bodyParser.json());
 
-console.log(process.env.ENV);
+console.log('Environment variable set to: ' + process.env.ENV);
 
 app.set('port', (process.env.PORT || config.environment.webPort));
 app.set('env', (process.env.ENV || 'development'));
