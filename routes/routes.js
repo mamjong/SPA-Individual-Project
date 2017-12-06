@@ -11,6 +11,10 @@ module.exports = (app) => {
 
 	app.post('/api/concepts', ConceptsController.post);
 
+	app.put('/api/concept/:id', ConceptsController.put);
+
+	app.delete('/api/concept/:id', ConceptsController.delete);
+
 	// User routes
 
 	app.get('/api/user/:username', UserController.getOne);

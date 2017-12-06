@@ -49,8 +49,6 @@ module.exports = {
 	delete(req, res, next) {
 		const username = req.params.username;
 
-		console.log('Request received!');
-
 		User.findOneAndRemove({ username: username })
 			.then((response) => {
 				if (response === null) {
