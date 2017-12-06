@@ -8,7 +8,7 @@ const environment = {
 };
 
 const dbConnectionUrl = process.env.NODE_ENV === 'production' ?
-	'mongodb://' + env.dbUser + ':' + environment.dbPassword + '@' + environment.dbHost + ':' + environment.dbPort + '/' + environment.dbDatabase :
+	'mongodb://' + environment.dbUser + ':' + environment.dbPassword + '@' + environment.dbHost + ':' + environment.dbPort + '/' + environment.dbDatabase :
 	'mongodb://localhost/' + environment.dbDatabase;
 
 module.exports = {
