@@ -1,3 +1,4 @@
+const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -23,10 +24,13 @@ console.log('Environment variable set to: ' + process.env.ENV);
 app.set('port', (process.env.PORT || config.environment.webPort));
 app.set('env', (process.env.ENV || 'development'));
 
-// app.use(function (req, res, next) {
-// 	res.setHeader('Access-Control-Allow_Origin', process.env.ALLOW_ORIGIN || '...');
-// 	next();
-// });
+app.use(function (req, res, next) {
+	res.setHeader('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN || 'http://localhost:4200');
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+	res.setHeader('Access-Control-Allow-Credentials', true);
+	next();
+});
 
 routes(app);
 
