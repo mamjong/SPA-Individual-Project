@@ -1,4 +1,3 @@
-const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -9,9 +8,9 @@ const app = express();
 
 mongoose.Promise = global.Promise;
 if (process.env.NODE_ENV !== 'test') {
-	mongoose.connect(config.dbConnectionUrl);
+	mongoose.connect(config.mongoDbConnectionUrl);
 	mongoose.connection
-		.once('open', () => console.log('Connected to MongoDB database on ' + config.dbConnectionUrl))
+		.once('open', () => console.log('Connected to MongoDB database on ' + config.mongoDbConnectionUrl))
 		.on('error', (error) => {
 			console.warn('Warning', error.toString());
 		});

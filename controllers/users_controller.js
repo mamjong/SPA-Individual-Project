@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const Concept = require('../models/concept');
 const Feedback = require('../models/feedback');
+var session = require('../neo4j');
+
 
 module.exports = {
 
@@ -17,8 +19,16 @@ module.exports = {
 		const newEntry = req.body;
 
 		User.create(newEntry)
-			.then((createdEntry) => res.status(201).send(createdEntry))
-			.catch((next));
+			.then((createdEntry) => {
+				session
+					.run('CREATE (user:User{username:{username}}) RETURN user', {username: createdEntry.username})
+					.then((response) => {
+						res.status(201).send({mongoDB: createdEntry, neo4J: response});
+					})
+					.catch((next))
+			})
+			.catch((next))
+
 	},
 
 	put(req, res, next) {

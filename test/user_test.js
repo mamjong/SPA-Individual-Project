@@ -36,7 +36,7 @@ describe('Users controller receiving', () => {
 					.send({ username: 'testuser2' })
 					.expect(201)
 					.then((response) => {
-						assert(response.body._id === 'testuser2');
+						assert(response.body.mongoDB._id === 'testuser2');
 						done();
 					});
 			});
