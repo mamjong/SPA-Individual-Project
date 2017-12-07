@@ -15,7 +15,7 @@ describe('Concepts controller receiving', () => {
 	beforeEach((done) => {
 		let testUser1 = new User({ username: 'testuser1' });
 		let testConcept1 = new Concept({ title: 'testgame1', genre: 'MMORPG', description: 'First testing concept.',
-			artImagePaths: [{ path: 'test.jpg' }]});
+			art: { path: 'test.jpg' }});
 		let testConcept2 = new Concept({ title: 'testgame2', genre: 'FPP Shooter', description: 'Second testing concept.' });
 
 		testConcept1.user = testUser1;
@@ -35,7 +35,7 @@ describe('Concepts controller receiving', () => {
 					.get('/api/concept/' + concept._id)
 					.then((response) => {
 						assert(response.body.title === 'testgame1');
-						assert(response.body.user.username === 'testuser1');
+						assert(response.body.user._id === 'testuser1');
 						done();
 					});
 			});
@@ -52,14 +52,13 @@ describe('Concepts controller receiving', () => {
 
 	it('a POST request to /api/concepts creates a new concept with the given properties', (done) => {
 
-		User.findOne({ username: 'testuser1' })
+		User.findById('testuser1')
 			.then((user) => {
 				request(app)
 					.post('/api/concepts')
 					.send({ title: 'createdConcept', genre: 'MMORPG', description: 'Test created concept', user })
 					.expect(201)
 					.then((response) => {
-						console.log(response.body.user + ' = ' + user._id);
 						assert(response.body.title === 'createdConcept');
 						assert(response.body.user === user._id.toString());
 						done();
@@ -74,20 +73,20 @@ describe('Concepts controller receiving', () => {
 					.put('/api/concept/000000000000000000000000')
 					.expect(404)
 					.then((response) => {
-						assert(response.body.error === 'The given concept does not exist')
+						assert(response.body.error === 'The given concept does not exist');
 						request(app)
 							.put('/api/concept/' + concept._id)
-							.send({ artImagePaths: [{ _id: concept.artImagePaths[0]._id, path: 'test.png' }] })
+							.send({ art: [{ _id: concept.art[0]._id, path: 'test.png' }] })
 							.expect(422)
 							.then(() => {
 								request(app)
 									.put('/api/concept/' + concept._id)
-									.send({ artImagePaths: [{ _id: concept.artImagePaths[0]._id, path: 'updatedtest.jpg' }] })
+									.send({ art: [{ _id: concept.art[0]._id, path: 'updatedtest.jpg' }] })
 									.then((response) => {
-										assert(response.body.artImagePaths[0].path === 'updatedtest.jpg');
+										assert(response.body.art[0].path === 'updatedtest.jpg');
 										done();
 									});
-							})
+							});
 					});
 			});
 	});

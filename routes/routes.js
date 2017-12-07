@@ -1,5 +1,6 @@
 const ConceptsController = require('../controllers/concepts_controller');
 const UserController = require('../controllers/users_controller');
+const FeedbackController = require('../controllers/feedback_controller');
 
 module.exports = (app) => {
 
@@ -24,4 +25,14 @@ module.exports = (app) => {
 	app.put('/api/user/:username', UserController.put);
 
 	app.delete('/api/user/:username', UserController.delete);
+
+	// Feedback routes
+
+	app.get('/api/feedback/:id', FeedbackController.get);
+
+	app.post('/api/feedback', FeedbackController.post);
+
+	app.put('/api/feedback/:id', FeedbackController.put);
+
+	app.delete('/api/feedback/:id', FeedbackController.delete);
 };

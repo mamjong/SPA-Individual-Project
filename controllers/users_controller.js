@@ -1,44 +1,40 @@
 const User = require('../models/user');
+const Concept = require('../models/concept');
+const Feedback = require('../models/feedback');
 
 module.exports = {
 
 	getOne(req, res, next) {
-		const username = req.params.username;
+		const param = req.params.username;
+		const username = param.toLowerCase();
 
-		User.findOne({ username: username })
+		User.findById(username)
 			.then((user) => res.send(user))
 			.catch((next));
 	},
 
 	post(req, res, next) {
 		const newEntry = req.body;
-		const newEntryUsername = req.body.username;
 
-		User.findOne({username: newEntryUsername})
-			.then((response) => {
-				if (response !== null) {
-					res.status(422).send({ error: 'The given username already exists' })
-				} else {
-					User.create(newEntry)
-						.then((createdEntry) => res.status(201).send(createdEntry))
-						.catch((next));
-				}
-			})
+		User.create(newEntry)
+			.then((createdEntry) => res.status(201).send(createdEntry))
 			.catch((next));
 	},
 
 	put(req, res, next) {
-		const username = req.params.username;
+		const param = req.params.username;
+		const username = param.toLowerCase();
+
 		const update = req.body;
 
 		delete update.username;
 
-		User.findOneAndUpdate({ username: username }, update)
+		User.findByIdAndUpdate(username, update)
 			.then((response) => {
 				if (response === null) {
 					res.status(404).send({ error: 'The given user does not exist' })
 				} else {
-					User.findOne({ username: username })
+					User.findById(username)
 						.then((updatedEntry) => res.send(updatedEntry))
 						.catch((next))
 				}
@@ -47,16 +43,24 @@ module.exports = {
 	},
 
 	delete(req, res, next) {
-		const username = req.params.username;
+		const param = req.params.username;
+		const username = param.toLowerCase();
 
-		User.findOneAndRemove({ username: username })
+		User.findByIdAndRemove(username)
 			.then((response) => {
 				if (response === null) {
 					res.status(404).send({ error: 'The given user does not exist' })
 				} else {
-					res.send(response);
+					Concept.remove({ user: username })
+						.then(() => {
+							Feedback.remove({ author: username })
+								.then(() => {
+									res.send(response);
+								});
+						})
+						.catch((next));
 				}
 			})
-			.catch((next))
+			.catch((next));
 	}
 };

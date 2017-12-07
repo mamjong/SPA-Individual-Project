@@ -1,4 +1,5 @@
 const Concept = require('../models/concept');
+const Feedback = require('../models/feedback');
 
 module.exports = {
 
@@ -27,6 +28,11 @@ module.exports = {
 	put(req, res, next) {
 		const id = req.params.id;
 		const update = req.body;
+		const receivedUser = req.body.user;
+		if (receivedUser !== undefined) {
+			const updateUser = receivedUser.toLowerCase();
+			update.author = updateUser;
+		}
 
 		Concept.findByIdAndUpdate(id, update, { runValidators: true })
 			.then((response) => {
@@ -49,9 +55,13 @@ module.exports = {
 				if (response === null) {
 					res.status(404).send({ error: 'The given concept does not exist' })
 				} else {
-					res.send(response);
+					Feedback.remove({ concept: id })
+						.then(() => {
+							res.send(response);
+						})
+						.catch((next));
 				}
 			})
-			.catch((next))
+			.catch((next));
 	}
 };

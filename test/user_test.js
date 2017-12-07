@@ -20,7 +20,7 @@ describe('Users controller receiving', () => {
 		request(app)
 			.get('/api/user/testuser1')
 			.then((response) => {
-				assert(response.body.username === 'testuser1');
+				assert(response.body._id === 'testuser1');
 				done();
 			});
 	});
@@ -30,14 +30,13 @@ describe('Users controller receiving', () => {
 			.post('/api/users')
 			.send({ username: 'testuser1' })
 			.expect(422)
-			.then((response) => assert(response.body.error === 'The given username already exists'))
 			.then(() => {
 				request(app)
 					.post('/api/users')
 					.send({ username: 'testuser2' })
 					.expect(201)
 					.then((response) => {
-						assert(response.body.username === 'testuser2');
+						assert(response.body._id === 'testuser2');
 						done();
 					});
 			});
@@ -48,7 +47,7 @@ describe('Users controller receiving', () => {
 			.put('/api/user/testuser1')
 			.send({ username: 'updatedUsername', bio: 'The user now has a bio.', name: 'Test User' })
 			.then((response) => {
-				assert(response.body.username === 'testuser1');
+				assert(response.body._id === 'testuser1');
 				assert(response.body.bio === 'The user now has a bio.');
 				assert(response.body.name === 'Test User');
 				done();
@@ -65,7 +64,7 @@ describe('Users controller receiving', () => {
 			request(app)
 				.delete('/api/user/testuser1')
 				.then((response) => {
-					assert(response.body.username === 'testuser1');
+					assert(response.body._id === 'testuser1');
 					done();
 				});
 			});
