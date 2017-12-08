@@ -8,16 +8,11 @@ const UserSchema = new Schema({
 		lowercase: true
 	},
 	name: String,
-	DoB: Date,
+	DoB: {
+		type: Date,
+		required: [true, 'A date of birth is required.']
+	},
 	bio: String
-});
-
-UserSchema.pre('remove', function(next) {
-	const Concept = mongoose.model('concept');
-
-	Concept.remove({ user: this._id})
-		.then(() => next());
-	// TODO: remove from Neo4J
 });
 
 const User = mongoose.model('user', UserSchema);

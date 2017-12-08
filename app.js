@@ -34,7 +34,7 @@ app.use(function (req, res, next) {
 routes(app);
 
 app.use((err, req, res, next) => {
-	res.status(422).send({ error: err.message });
+	res.status(422).send({error: err.message});
 });
 
 app.use('*', (req, res) => {

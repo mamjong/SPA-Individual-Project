@@ -16,11 +16,13 @@ before((done) => {
 
 beforeEach((done) => {
 	//TODO: drop newly added models
-	const { concepts, users } = mongoose.connection.collections;
+	const {concepts, users, feedbacks} = mongoose.connection.collections;
 
 	concepts.drop(() => {
 		users.drop(() => {
-			done();
+			feedbacks.drop(() => {
+				done();
+			});
 		});
 	});
 });

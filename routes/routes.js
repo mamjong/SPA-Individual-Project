@@ -20,9 +20,15 @@ module.exports = (app) => {
 
 	app.get('/api/user/:username', UserController.getOne);
 
+	app.get('/api/user/:username/related', UserController.getRelated);
+
 	app.post('/api/users', UserController.post);
 
+	app.post('/api/user/:username/connect', UserController.postConnect);
+
 	app.put('/api/user/:username', UserController.put);
+
+	app.put('/api/user/:username/connect', UserController.putConnect);
 
 	app.delete('/api/user/:username', UserController.delete);
 
