@@ -11,7 +11,13 @@ module.exports = {
 		const username = param.toLowerCase();
 
 		User.findById(username)
-			.then((user) => res.send(user))
+			.then((user) => {
+				if (user === null) {
+					res.status(404).send({ error: "The given user does not exist" })
+				} else	{
+					res.send(user);
+				}
+			})
 			.catch((next));
 	},
 
@@ -49,7 +55,9 @@ module.exports = {
 				res.status(201).send({mongoDB: entry, neo4J: response});
 				session.close();
 			})
-			.catch((next));
+			.catch((next) => {
+				User.findByIdAndRemove(entry._id);
+			});
 
 	},
 
