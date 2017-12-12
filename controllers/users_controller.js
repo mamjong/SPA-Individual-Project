@@ -13,8 +13,8 @@ module.exports = {
 		User.findById(username)
 			.then((user) => {
 				if (user === null) {
-					res.status(404).send({ error: "The given user does not exist" })
-				} else	{
+					res.status(404).send({error: "The given user does not exist"})
+				} else {
 					res.send(user);
 				}
 			})
@@ -55,9 +55,7 @@ module.exports = {
 				res.status(201).send({mongoDB: entry, neo4J: response});
 				session.close();
 			})
-			.catch((next) => {
-				User.findByIdAndRemove(entry._id);
-			});
+			.catch((next));
 
 	},
 
@@ -121,15 +119,12 @@ module.exports = {
 
 		User.findById(username)
 			.then((user) => {
-				session
-					.run('MATCH (user:User{username: {username}})-[:BORN_IN]->(dob) ' +
-						'RETURN dob', {username: username})
-					.then((response) => {
-						if (response.records.length === 0) {
-							res.status(400).send({error: 'User is not yet connected or doesn\'t exist, post to api/user/' + username + '/connect'});
-						} else {
-							if (response.records[0]._fields[0].properties.DoB === user.DoB.toDateString()) {
-								res.status(400).send({error: 'Users date of birth connection is up-to-date'})
+					session
+						.run('MATCH (user:User{username: {username}})-[:BORN_IN]->(dob) ' +
+							'RETURN dob', {username: username})
+						.then((response) => {
+							if (response.records.length === 0) {
+								res.status(400).send({error: 'User is not yet connected or doesn\'t exist, post to api/user/' + username + '/connect'});
 							} else {
 								return session.run('MATCH (user:User{username: {username}})-[rel:BORN_IN]->(dob) ' +
 									'DELETE rel', {username: username})
@@ -148,9 +143,9 @@ module.exports = {
 									})
 									.catch((next));
 							}
-						}
-					})
-			})
+						})
+				}
+			)
 			.catch((next));
 	},
 
@@ -181,4 +176,5 @@ module.exports = {
 			})
 			.catch((next));
 	}
-};
+}
+;
