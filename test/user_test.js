@@ -24,13 +24,18 @@ describe('Users controller receiving', () => {
 			});
 	});
 
-	it('a GET request to /api/user/:username returns the user with the given username', (done) => {
+	it('a GET request to /api/user/:username returns the user with the given username and an error if that user doesn\'t exist', (done) => {
 		request(app)
 			.get('/api/user/TESTUSER1')
 			.then((response) => {
 				assert(response.body._id === 'testuser1');
+				return request(app)
+					.get('/api/user/nonexistinguser');
+			})
+			.then((response) => {
+				assert(response.body.error === 'The given user does not exist');
 				done();
-			});
+			})
 	});
 
 	it('a POST request to /api/user creates a new user with the given properties if the username doesn\'t already exist', (done) => {
@@ -45,6 +50,8 @@ describe('Users controller receiving', () => {
 					.expect(201)
 			})
 			.then((response) => {
+				assert(response.body.neo4J.summary.counters._stats.nodesCreated === 1);
+				assert(response.body.neo4J.records[0]._fields[0].properties.username === 'testuser2');
 				assert(response.body.mongoDB._id === 'testuser2');
 				done();
 			});
@@ -78,6 +85,16 @@ describe('Users controller receiving', () => {
 			.expect(404)
 			.then((response) => {
 				assert(response.body.error === 'The given user does not exist');
+				return request(app)
+					.post('/api/users')
+					.send({username: 'testuser3', DoB: '1999-12-30'})
+			})
+			.then(() => {
+				return request(app)
+					.delete('/api/user/TESTUSER3')
+			})
+			.then((response) => {
+				assert(response.body.neo4J.summary.counters._stats.nodesDeleted === 1);
 				return request(app)
 					.delete('/api/user/TESTUSER1')
 			})

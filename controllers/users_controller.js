@@ -56,7 +56,6 @@ module.exports = {
 				session.close();
 			})
 			.catch((next));
-
 	},
 
 	postConnect(req, res, next) {
