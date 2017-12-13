@@ -16,34 +16,19 @@ before((done) => {
 });
 
 beforeEach((done) => {
-	//TODO: drop newly added models
 	const {concepts, users, feedbacks} = mongoose.connection.collections;
 
 	const session = driver.session();
 
-	// session.run('MATCH (n) DETACH DELETE n;')
-	// 	.then(() => {
-	// 		concepts.drop(() => {
-	// 			users.drop(() => {
-	// 				feedbacks.drop(() => {
-	// 					done();
-	// 				});
-	// 			});
-	// 		});
-	// 	});
-
 	session.run('MATCH (n) DETACH DELETE n;')
 		.then(() => {
-		return concepts.drop();
-		})
-		.then(() => {
-		return users.drop();
-		})
-		.then(() => {
-		return feedbacks.drop();
-		})
-		.then(() => {
-		done();
+			concepts.drop(() => {
+				users.drop(() => {
+					feedbacks.drop(() => {
+						done();
+					});
+				});
+			});
 		});
 });
 

@@ -2,49 +2,110 @@ const mongoose = require('mongoose');
 const assert = require('assert');
 const request = require('supertest');
 const app = require('../app');
+const driver = require('../neo4j');
 
 const Concept = mongoose.model('concept');
 const User = mongoose.model('user');
 const Feedback = mongoose.model('feedback');
 
-xdescribe('Feedback controller receiving', () => {
+describe('Neo4J endpoints receiving ', () => {
 
 	beforeEach((done) => {
-		let testFeedback1 = new Feedback({content: 'testcontent1', rating: 2});
-		let testFeedback2 = new Feedback({content: 'testcontent2', rating: 3});
+		const session = driver.session();
 
-		let testUser = new User({username: 'testuser1', DoB: '1999-06-29'});
+		const sameDate = new Date('1999-6-6');
+		const differentDate = new Date('1999-12-12');
 
-		let testConcept1 = new Concept({title: 'testconcept1', genre: 'MMORPG', description: 'This is a test concept'});
-		let testConcept2 = new Concept({
-			title: 'testconcept2',
-			genre: 'FPP Shooter',
-			description: 'This is a second test concept'
-		});
-
-		testFeedback1.concept = testConcept1;
-		testFeedback2.concept = testConcept2;
-
-		testConcept1.user = testUser;
-		testConcept2.user = testUser;
-
-		Promise.all([testUser.save(), testConcept1.save(), testConcept2.save(), testFeedback1.save(), testFeedback2.save()])
+		User.create({username: 'testuser1', DoB: '1999-6-6'})
 			.then(() => {
-				done();
+				return User.create({username: 'testuser2', DoB: '1999-12-12'})
 			})
-	});
-
-	xit('a GET request to /api/feedback/:id returns all feedback on the concept with given id', (done) => {
-
-		Concept.findOne({title: 'testconcept1'})
-			.then((concept) => {
-				return request(app)
-					.get('/api/feedback/' + concept._id)
+			.then(() => {
+				return User.create({username: 'testuser3', DoB: '1999-6-6'})
 			})
-			.then((response) => {
-				assert(response.body.length === 1);
-				assert(response.body[0].content === 'testcontent1');
-				done();
+			.then(() => {
+				session.run('CREATE (user:User{username: {username}}) RETURN user', {username: 'testuser1'})
+					.then(() => {
+						return session.run('MATCH (user:User{username: {username}}) ' +
+							'MERGE (dob:DoB{DoB: {birthdate}}) ' +
+							'MERGE (user)-[:BORN_IN]->(dob) ' +
+							'RETURN user, dob', {birthdate: sameDate.toDateString(), username: 'testuser1'})
+					})
+					.then(() => {
+						session.run('CREATE (user:User{username: {username}}) RETURN user', {username: 'testuser3'})
+							.then(() => {
+								return session.run('MATCH (user:User{username: {username}}) ' +
+									'MERGE (dob:DoB{DoB: {birthdate}}) ' +
+									'MERGE (user)-[:BORN_IN]->(dob) ' +
+									'RETURN user, dob', {birthdate: sameDate.toDateString(), username: 'testuser3'})
+							});
+					})
+					.then(() => {
+						session.run('CREATE (user:User{username: {username}}) RETURN user', {username: 'testuser2'})
+							.then(() => {
+								return session.run('MATCH (user:User{username: {username}}) ' +
+									'MERGE (dob:DoB{DoB: {birthdate}}) ' +
+									'MERGE (user)-[:BORN_IN]->(dob) ' +
+									'RETURN user, dob', {
+									birthdate: differentDate.toDateString(),
+									username: 'testuser2'
+								})
+							});
+					})
+					.then(() => {
+						done();
+					})
 			});
 	});
-});
+
+
+		it('a postConnect request to /api/user/:id/connect adds the users DoB as a Node and creates a link between both.', (done) => {
+
+			request(app)
+				.post('/api/users')
+				.send({username: 'test', DoB: '1900-1-1'})
+				.then(() => {
+					return request(app)
+						.post('/api/user/test/connect');
+				})
+				.then((response) => {
+					assert(response.body.summary.counters._stats.nodesCreated === 1);
+					assert(response.body.summary.counters._stats.relationshipsCreated === 1);
+					done();
+				});
+		});
+
+		it('a putConnect request to /api/user/:id/connect adds the users new DoB as a Node and creates a link between both.', (done) => {
+
+			request(app)
+				.post('/api/users')
+				.send({username: 'test', DoB: '1900-1-1'})
+				.then(() => {
+					return request(app)
+						.post('/api/user/test/connect');
+				})
+				.then(() => {
+					return request(app)
+						.put('/api/user/test')
+						.send({DoB: '1900-2-2'})
+				})
+				.then(() => {
+					return request(app)
+						.put('/api/user/test/connect');
+				})
+				.then((response) => {
+					assert(response.body.summary.updateStatistics._stats.nodesCreated === 1);
+					assert(response.body.summary.updateStatistics._stats.relationshipsCreated === 1);
+					done();
+				});
+		});
+
+		it('a GET request to /api/user/:username/related returns all users with the same DoB as the specified user.', (done) => {
+			request(app)
+				.get('/api/user/testuser1/related')
+				.then((response) => {
+					console.log(response.body.records[0]._fields[0].properties.username === 'testuser3');
+					done();
+				});
+		})
+	});

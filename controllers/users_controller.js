@@ -175,5 +175,4 @@ module.exports = {
 			})
 			.catch((next));
 	}
-}
-;
+};
