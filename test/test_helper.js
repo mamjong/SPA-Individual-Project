@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+var driver = require('../neo4j');
 
 mongoose.Promise = global.Promise;
 
@@ -15,12 +16,19 @@ before((done) => {
 });
 
 beforeEach((done) => {
-	//TODO: drop newly added models
-	const { concepts, users } = mongoose.connection.collections;
+	const {concepts, users, feedbacks} = mongoose.connection.collections;
 
-	concepts.drop(() => {
-		users.drop(() => {
-			done();
+	const session = driver.session();
+
+	session.run('MATCH (n) DETACH DELETE n;')
+		.then(() => {
+			concepts.drop(() => {
+				users.drop(() => {
+					feedbacks.drop(() => {
+						done();
+					});
+				});
+			});
 		});
-	});
 });
+

@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const UserSchema = require('./user');
 
 const FeedbackSchema = mongoose.Schema({
 	content: {
@@ -10,12 +9,19 @@ const FeedbackSchema = mongoose.Schema({
 	rating: {
 		type: Number,
 		required: [true, 'Please give this concept a rating.'],
-		validate: {
-			validator: (rating) => rating.max(5) && rating.min(1),
-			message: 'Rating must be between 1 and 5.'
-		}
+		min: 1,
+		max: 5,
 	},
-	author: [UserSchema.username]
+	author: {
+		type: Schema.Types.String,
+		ref: 'user',
+		lowercase: true,
+	},
+	concept: {
+		type: Schema.Types.ObjectId,
+		ref: 'concept',
+		required: [true, 'Feedback must be linked to a concept.']
+	}
 });
 
 const Feedback = mongoose.model('feedback', FeedbackSchema);

@@ -1,4 +1,3 @@
-const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -9,9 +8,9 @@ const app = express();
 
 mongoose.Promise = global.Promise;
 if (process.env.NODE_ENV !== 'test') {
-	mongoose.connect(config.dbConnectionUrl);
+	mongoose.connect(config.mongoDbConnectionUrl);
 	mongoose.connection
-		.once('open', () => console.log('Connected to MongoDB database on ' + config.dbConnectionUrl))
+		.once('open', () => console.log('Connected to MongoDB database on ' + config.mongoDbConnectionUrl))
 		.on('error', (error) => {
 			console.warn('Warning', error.toString());
 		});
@@ -26,16 +25,21 @@ app.set('env', (process.env.ENV || 'development'));
 
 app.use(function (req, res, next) {
 	res.setHeader('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN || 'http://localhost:4200');
-	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 	res.setHeader('Access-Control-Allow-Credentials', true);
-	next();
+
+	if (req.method === 'OPTIONS') {
+		return res.status(200).end();
+	}
+
+	return next();
 });
 
 routes(app);
 
 app.use((err, req, res, next) => {
-	res.status(422).send({ error: err.message });
+	res.status(422).send({error: err.message});
 });
 
 app.use('*', (req, res) => {

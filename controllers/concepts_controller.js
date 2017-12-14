@@ -1,4 +1,5 @@
 const Concept = require('../models/concept');
+const Feedback = require('../models/feedback');
 
 module.exports = {
 
@@ -27,17 +28,22 @@ module.exports = {
 	put(req, res, next) {
 		const id = req.params.id;
 		const update = req.body;
+		const receivedUser = req.body.user;
 
-		Concept.findByIdAndUpdate(id, update, { runValidators: true })
+		if (receivedUser !== undefined) {
+			const updateUser = receivedUser.toLowerCase();
+			update.user = updateUser;
+		}
+
+		Concept.findByIdAndUpdate(id, update, {runValidators: true})
 			.then((response) => {
 				if (response === null) {
-					res.status(404).send({ error: 'The given concept does not exist' })
+					res.status(404).send({error: 'The given concept does not exist'})
 				} else {
-					Concept.findById(id)
-						.then((updatedEntry) => res.send(updatedEntry))
-						.catch((next));
+					return Concept.findById(id)
 				}
 			})
+			.then((updatedEntry) => res.send(updatedEntry))
 			.catch((next));
 	},
 
@@ -45,13 +51,17 @@ module.exports = {
 		const id = req.params.id;
 
 		Concept.findByIdAndRemove(id)
-			.then((response) => {
-				if (response === null) {
-					res.status(404).send({ error: 'The given concept does not exist' })
+			.then((dbResponse) => {
+				if (dbResponse === null) {
+					res.status(404).send({error: 'The given concept does not exist'});
 				} else {
-					res.send(response);
+					Feedback.remove({concept: id})
+						.then(() => {
+							res.send(dbResponse);
+						})
+						.catch((next))
 				}
 			})
-			.catch((next))
+			.catch((next));
 	}
 };

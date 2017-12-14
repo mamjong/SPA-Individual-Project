@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const ArtSchema = require('./art');
 
 const ConceptSchema = new Schema({
 	title: {
@@ -15,18 +16,12 @@ const ConceptSchema = new Schema({
 		required: [true, 'A concept must have a gameplay description.']
 	},
 	likes: Number,
-	artImagePaths: [{
-		path: {
-			type: String,
-			validate: {
-				validator: (path) => path.endsWith('.jpg' || '.jpeg'),
-				message: 'The image must be a JPEG.'
-			}
-		}
-	}],
+	art: [ArtSchema],
 	user: {
-		type: Schema.Types.ObjectId,
-		ref: 'user'
+		type: Schema.Types.String,
+		ref: 'user',
+		lowercase: true,
+		required: [true, 'A concept must be linked to a user.']
 	}
 });
 
